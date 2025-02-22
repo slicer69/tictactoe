@@ -125,11 +125,12 @@ def get_player_move(my_board):
        elif direction == "right" and joy_x > 1:
           joy_x -= 1
        elif direction == "middle":
-          finished = True
+          target_square = (joy_y - 1) * 3  + (joy_x - 1)
+          if my_board[target_square] == player_symbols[NONE]:
+              finished = True
 
        draw_board_with_joystick(my_board, joy_x, joy_y)
  
-   target_square = (joy_y - 1) * 3  + (joy_x - 1)
    return target_square
 
 
