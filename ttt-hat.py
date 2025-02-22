@@ -66,29 +66,70 @@ def convert_board(my_board):
         pixel_index += 15 
 
 
+# Get an action from the joystick. Waits for the joystick to
+# be released before returning the last direction/action
+# given.
+def joystick_action():
+  event = sense.stick.wait_for_event(emptybuffer=True)
+  while event.action != "released":
+     time.sleep(0.1)
+     event = sense.stick.wait_for_event(emptybuffer=True)
+  
+  sense.stick.get_events()
+  return event.direction
+
+
+# Draw the board, then add the joystick cursor on top.
+def draw_board_with_joystick(my_board, joy_x, joy_y):
+   # Show the original board, without the cursor
+   draw_board()
+
+   # pick colour
+   offset = (joy_y - 1) * 3
+   offset += (joy_x - 1)
+   symbol = my_board[offset] 
+   if symbol == player_symbols[NONE]:
+      colour = Y
+   else:
+      colour = P
+
+   # Translate 3x3 grid to 8x8 grid
+   x = (joy_x - 1) * 3
+   y = (joy_y - 1) * 3
+
+   sense.set_pixel(x, y, colour)
+   sense.set_pixel(x + 1, y, colour)
+   sense.set_pixel(x, y + 1, colour)
+   sense.set_pixel(x + 1, y + 1, colour)
+
+
 # Get the human player's move. Make sure it does not
 # overlap with another mark on the board.
 # Return the position of the move in the range of 0-8.
 def get_player_move(my_board):
-
    finished = False
-   while not finished:
-      answer = input("Enter your move [1-9]> ")
-      if answer.isnumeric():
-          target_square = int(answer)
-          if target_square < 1 or target_square > 9:
-             print("Please pick a square in the range of 1 to 9.\n")
-          elif my_board[target_square - 1] != player_symbols[NONE]:
-             print("This square is already taken.\n")
-          else:
-             finished = True
-      else:
-         print("Please try a single-digit number.")
+   joy_x = 2
+   joy_y = 2
 
-      if not finished:
-         draw_board()
+   while not finished:
+       draw_board_with_joystick(my_board, joy_x, joy_y)
+       direction = joystick_action()
+       # move cursor
+       # remember, direction of stick is inverse
+       if direction == "up" and joy_y < 3:
+          joy_y += 1
+       elif direction == "down" and joy_y > 1:
+          joy_y -= 1
+       elif direction == "left" and joy_x < 3:
+          joy_x += 1
+       elif direction == "right" and joy_x > 1:
+          joy_x -= 1
+       elif direction == "middle":
+          finished = True
+
+       draw_board_with_joystick(my_board, joy_x, joy_y)
  
-   target_square -= 1
+   target_square = (joy_y - 1) * 3  + (joy_x - 1)
    return target_square
 
 
@@ -387,7 +428,7 @@ def main():
    for square in range(squares):
        board.append(player_symbols[NONE])
 
-   while game_finished == False:
+   while not game_finished:
       convert_board(board)
       draw_board()
       target_square = get_player_move(board)
@@ -416,8 +457,11 @@ def main():
    # end of while game is not finished
    convert_board(board)
    declare_winner(board, winner)
+   # clean up sense hat
    sense.clear()
+   sense.stick.get_events()
    sys.exit()
+
 
 if __name__ == "__main__":
    main()
