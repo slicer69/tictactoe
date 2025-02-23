@@ -32,3 +32,6 @@ and purple when over an occupied square.
 When the game is finished a quick message scrolls across the LED
 display to indicate which player won.
 
+The Sense HAT version of the game will clean up and exit cleanly
+when the player presses Ctrl-C.
+
