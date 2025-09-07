@@ -1,6 +1,7 @@
 # Tic Tac Toe (TTT)
 Various implementations of Tic Tac Toe in Python
 
+## This project has been migrated to CodeBerg: https://codeberg.org/thejessesmith/tictactoe
 
 This repository contains two implementations of the game Tic Tac Toe,
 written in Python.
